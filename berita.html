@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Kelola Berita{% endblock %}
+{% block topbar_title %}Kelola Berita{% endblock %}
+{% block topbar_sub %}Tambah, edit, dan hapus konten berita &amp; video edukasi{% endblock %}
+{% block content %}
+<div class="ph">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div><h1>Kelola Berita</h1><p>Manajemen konten berita, edaran, dan video edukasi keselamatan jalan.</p></div>
+    <a href="{{ url_for('admin_berita_tambah') }}" class="btn btn-pri"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Tambah Berita</a>
+  </div>
+</div>
+<div class="card">
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Judul</th><th>Kategori</th><th>Penulis</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead>
+      <tbody>
+        {% for n in news %}
+        <tr>
+          <td class="mono" style="color:var(--tx2)">{{ loop.index }}</td>
+          <td style="max-width:240px"><div style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ n.title }}</div></td>
+          <td><span class="badge {% if n.category=='video' %}bd-r{% elif n.category=='edaran' %}bd-a{% else %}bd-b{% endif %}">{{ n.category }}</span></td>
+          <td style="color:var(--tx2)">{{ n.author }}</td>
+          <td class="mono" style="color:var(--tx2)">{{ n.created_at.strftime('%d %b %Y') }}</td>
+          <td><span class="schip {% if n.is_active %}ch-done{% else %}ch-err{% endif %}">{{ 'Aktif' if n.is_active else 'Nonaktif' }}</span></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="{{ url_for('admin_berita_edit', nid=n.id) }}" class="btn btn-out btn-sm">Edit</a>
+              <form method="POST" action="{{ url_for('admin_berita_hapus', nid=n.id) }}" onsubmit="return confirm('Hapus berita ini?')"><button type="submit" class="btn btn-red btn-sm">Hapus</button></form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if not news %}<div style="text-align:center;padding:32px;color:var(--tx2)">Belum ada berita. Klik Tambah Berita untuk mulai.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

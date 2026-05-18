@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Konfigurasi Sistem{% endblock %}
+{% block topbar_title %}Konfigurasi Sistem{% endblock %}
+{% block topbar_sub %}Pengaturan parameter analisis dan notifikasi{% endblock %}
+{% block content %}
+<div class="ph"><h1>Konfigurasi Sistem</h1><p>Atur parameter default untuk engine analisis dan notifikasi.</p></div>
+<form method="POST">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+  <div class="card">
+    <div class="ch"><div class="ct">Parameter Engine DIANA</div></div>
+    <div class="cb">
+      <div class="fg"><label class="fl">PPM Default (Pixel per Meter)</label>
+        <input type="number" name="ppm_default" class="fi" value="{{ cfg.ppm_default }}" step="0.1" placeholder="20.0">
+        <div class="fhint">Nilai PPM jika auto-kalibrasi tidak berjalan. Default: 20.0</div></div>
+      <div class="fg"><label class="fl">Kapasitas Jalan Referensi (smp/jam)</label>
+        <input type="number" name="capacity_default" class="fi" value="{{ cfg.capacity_default }}" placeholder="1000">
+        <div class="fhint">Untuk perhitungan Derajat Kejenuhan (DJ) PKJI 2023.</div></div>
+      <div class="fg"><label class="fl">Model YOLO</label>
+        <select name="model_path" class="fs">
+          <option value="yolov8n.pt" {{ 'selected' if cfg.model_path=='yolov8n.pt' }}>YOLOv8n (Cepat — Recommended)</option>
+          <option value="yolov8s.pt" {{ 'selected' if cfg.model_path=='yolov8s.pt' }}>YOLOv8s (Seimbang)</option>
+          <option value="yolov8m.pt" {{ 'selected' if cfg.model_path=='yolov8m.pt' }}>YOLOv8m (Akurat)</option>
+          <option value="yolov8l.pt" {{ 'selected' if cfg.model_path=='yolov8l.pt' }}>YOLOv8l (Sangat Akurat — Butuh GPU)</option>
+          <option value="yolov12n.pt" {{ 'selected' if cfg.model_path=='yolov12n.pt' }}>YOLOv12n (Opsional — perlu install manual)</option>
+        </select>
+        <div class="fhint">Pastikan file .pt sudah ada di folder yang sama dengan app_web.py.</div></div>
+      <div class="fg"><label class="fl">Confidence Threshold</label>
+        <input type="number" name="conf_threshold" class="fi" value="{{ cfg.conf_threshold }}" step="0.01" min="0.1" max="0.9" placeholder="0.28">
+        <div class="fhint">Tingkat kepercayaan deteksi (0.1–0.9). Default: 0.28 untuk jalan raya.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><div class="ct">Notifikasi Telegram (Opsional)</div></div>
+    <div class="cb">
+      <div class="fg"><label class="fl">Bot Token</label>
+        <input type="text" name="telegram_token" class="fi" value="{{ cfg.telegram_token }}" placeholder="123456789:ABCdef...">
+        <div class="fhint">Token dari @BotFather Telegram.</div></div>
+      <div class="fg"><label class="fl">Chat ID</label>
+        <input type="text" name="telegram_chat" class="fi" value="{{ cfg.telegram_chat }}" placeholder="-100123456789">
+        <div class="fhint">ID grup atau channel untuk menerima notifikasi kejadian bahaya.</div></div>
+    </div>
+  </div>
+</div>
+<div style="margin-top:8px"><button type="submit" class="btn btn-pri">Simpan Konfigurasi</button></div>
+</form>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if item else 'Tambah' }} Berita{% endblock %}
+{% block topbar_title %}{{ 'Edit' if item else 'Tambah' }} Berita{% endblock %}
+{% block content %}
+<div class="ph"><h1>{{ 'Edit' if item else 'Tambah' }} Berita</h1></div>
+<div class="card" style="max-width:720px">
+  <div class="ch"><div class="ct">{{ 'Edit Konten' if item else 'Konten Baru' }}</div></div>
+  <div class="cb">
+    <form method="POST">
+      <div class="fg"><label class="fl">Judul <span style="color:var(--red)">*</span></label>
+        <input type="text" name="title" class="fi" value="{{ item.title if item else '' }}" required placeholder="Judul berita atau artikel"></div>
+      <div class="fg"><label class="fl">Konten <span style="color:var(--red)">*</span></label>
+        <textarea name="content" class="fta" required rows="5" placeholder="Isi berita...">{{ item.content if item else '' }}</textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="fg"><label class="fl">Kategori</label>
+          <select name="category" class="fs">
+            <option value="berita" {{ 'selected' if item and item.category=='berita' else '' }}>Berita</option>
+            <option value="video"  {{ 'selected' if item and item.category=='video'  else '' }}>Video</option>
+            <option value="edaran" {{ 'selected' if item and item.category=='edaran' else '' }}>Edaran</option>
+          </select></div>
+        <div class="fg"><label class="fl">URL Gambar (opsional)</label>
+          <input type="url" name="image_url" class="fi" value="{{ item.image_url if item else '' }}" placeholder="https://..."></div>
+      </div>
+      <div class="fg"><label class="fl">URL Video YouTube (opsional)</label>
+        <input type="url" name="video_url" class="fi" id="ytInput"
+               value="{{ item.video_url if item else '' }}"
+               placeholder="https://www.youtube.com/watch?v=..."
+               oninput="previewYT(this.value)">
+        <div class="fhint">Masukkan URL YouTube (watch, embed, atau youtu.be) — akan otomatis dikonversi ke embed.</div>
+        <div id="ytPreview" style="margin-top:10px;display:none">
+          <div style="font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:6px">Preview Thumbnail:</div>
+          <a id="ytLink" href="#" target="_blank" rel="noopener" style="display:inline-block;position:relative;border-radius:8px;overflow:hidden;max-width:280px">
+            <img id="ytThumb" src="" alt="thumbnail" style="width:100%;border-radius:8px;display:block">
+            <div style="position:absolute;inset:0;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;border-radius:8px">
+              <div style="width:44px;height:44px;background:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              </div>
+            </div>
+          </a>
+          <div style="margin-top:6px;font-size:12px;color:var(--grn);font-weight:600">✓ Video YouTube terdeteksi</div>
+        </div>
+      </div>
+      {% if item %}
+      <div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600">
+        <input type="checkbox" name="is_active" {{ 'checked' if item.is_active else '' }}> Tampilkan di halaman publik</label></div>
+      {% endif %}
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button type="submit" class="btn btn-pri">Simpan</button>
+        <a href="{{ url_for('admin_berita') }}" class="btn btn-out">Batal</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+function extractYTId(url){
+  for(const p of['v=','youtu.be/','embed/','shorts/']){
+    if(url.includes(p)){
+      return url.split(p)[1].split('&')[0].split('?')[0].split('/')[0];
+    }
+  }
+  return null;
+}
+function previewYT(url){
+  const id=extractYTId(url);
+  const d=document.getElementById('ytPreview');
+  if(id){
+    document.getElementById('ytThumb').src=`https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+    document.getElementById('ytLink').href=`https://www.youtube.com/watch?v=${id}`;
+    d.style.display='block';
+  } else {
+    d.style.display='none';
+  }
+}
+// Auto-preview if editing existing item with video_url
+window.addEventListener('DOMContentLoaded',()=>{
+  const v=document.getElementById('ytInput').value;
+  if(v) previewYT(v);
+});
+</script>
+{% endblock %}
