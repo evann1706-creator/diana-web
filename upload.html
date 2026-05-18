@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Upload Video{% endblock %}
+{% block topbar_title %}Upload Video Analisis{% endblock %}
+{% block topbar_sub %}Unggah rekaman CCTV untuk dianalisis{% endblock %}
+{% block content %}
+<style>
+.upload-grid{display:grid;grid-template-columns:1fr 360px;gap:22px}
+.dropzone{border:2px dashed var(--bd);border-radius:var(--r);padding:48px 28px;text-align:center;cursor:pointer;transition:all .2s;background:var(--wh);position:relative}
+.dropzone:hover,.dropzone.drag{border-color:var(--pri);background:var(--pri-l)}
+.dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz-icon{width:52px;height:52px;border-radius:14px;background:var(--pri-l);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.dz-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.dz-hint{font-size:13px;color:var(--tx2)}
+.dz-meta{font-size:11.5px;color:var(--tx3);margin-top:6px}
+.file-preview{background:var(--pri-l);border:1px solid rgba(26,86,219,.2);border-radius:var(--rsm);padding:13px 16px;display:none;align-items:center;gap:12px;margin-top:14px}
+.file-preview.show{display:flex}
+.fp-name{font-size:13px;font-weight:600;color:var(--pri)}
+.fp-size{font-size:11.5px;color:var(--tx2)}
+.info-box{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--sh)}
+.ib-title{font-size:13px;font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--bd)}
+.ib-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+.ib-row:last-child{border-bottom:none}
+.ib-key{color:var(--tx2)}
+.ib-val{font-weight:600;font-family:'JetBrains Mono',monospace;font-size:12px}
+.ttc-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+.ttc-item:last-child{border-bottom:none}
+@media(max-width:900px){.upload-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="ph"><h1>Upload Video Analisis</h1><p>Unggah rekaman video MP4 dari CCTV ATCS atau dashcam untuk dianalisis oleh sistem DIANA.</p></div>
+
+<form id="uploadForm" method="POST" enctype="multipart/form-data">
+<div class="upload-grid">
+  <!-- LEFT: FORM -->
+  <div>
+    <!-- Video File -->
+    <div class="card" style="margin-bottom:18px">
+      <div class="ch"><div class="ct">File Video &amp; Informasi CCTV</div></div>
+      <div class="cb">
+        <div class="fg">
+          <label class="fl">File Video <span>*</span></label>
+          <div class="dropzone" id="dropzone">
+            <input type="file" name="video" accept=".mp4" id="fileInput" required>
+            <div class="dz-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--pri)" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <div class="dz-title">Seret video ke sini</div>
+            <div class="dz-hint">atau klik untuk memilih file</div>
+            <div class="dz-meta">Format: MP4 · Maksimal 500 MB</div>
+          </div>
+          <div class="file-preview" id="filePreview">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pri)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            <div><div class="fp-name" id="fpName"></div><div class="fp-size" id="fpSize"></div></div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="fg">
+            <label class="fl">Nama Jalan / Lokasi <span>*</span></label>
+            <input type="text" name="road_name" class="fi" placeholder="cth: Simpang Purwokerto" value="Simpang Purwokerto" required>
+          </div>
+          <div class="fg">
+            <label class="fl">Tanggal CCTV <span>*</span></label>
+            <input type="date" name="cctv_date" class="fi" value="{{ now_date }}" required>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Jumlah Lajur <span>*</span></label>
+          <select name="n_lanes" class="fi" style="cursor:pointer">
+            <option value="2">2 Lajur</option>
+            <option value="3">3 Lajur</option>
+            <option value="4" selected>4 Lajur (A-1, A-2, B-1, B-2)</option>
+            <option value="6">6 Lajur</option>
+          </select>
+          <div class="fhint">Sesuaikan dengan jumlah lajur pada video CCTV yang diunggah.</div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Jam Mulai CCTV <span>*</span></label>
+          <input type="time" name="cctv_time" class="fi" value="08:00" required>
+          <div class="fhint">Masukkan jam sesuai timestamp rekaman video CCTV.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" class="btn btn-pri" id="submitBtn" style="width:100%;justify-content:center;padding:13px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Proses Video Sekarang
+    </button>
+    <div id="uploadProgress" style="display:none;margin-top:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+        <span style="font-weight:600">Mengunggah video...</span>
+        <span id="uploadPct">0%</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-bar" id="uploadBar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: INFO PANELS -->
+  <div>
+    <div class="info-box">
+      <div class="ib-title">Spesifikasi Engine</div>
+      <div class="ib-row"><span class="ib-key">Model Deteksi</span><span class="ib-val">YOLOv8n</span></div>
+      <div class="ib-row"><span class="ib-key">Pelacakan</span><span class="ib-val">ByteTrack</span></div>
+      <div class="ib-row"><span class="ib-key">Kelas Kendaraan</span><span class="ib-val">KR · KB · SM</span></div>
+      <div class="ib-row"><span class="ib-key">Standar Output</span><span class="ib-val">PKJI 2023</span></div>
+      <div class="ib-row"><span class="ib-key">Prediksi Bahaya</span><span class="ib-val">TTC Hayward 1972</span></div>
+    </div>
+
+    <div class="info-box">
+      <div class="ib-title">Threshold Peringatan TTC</div>
+      <div class="ttc-item">
+        <span>Bahaya</span>
+        <span class="badge bd-r">TTC &lt; 1,5 detik</span>
+      </div>
+      <div class="ttc-item">
+        <span>Waspada</span>
+        <span class="badge bd-a">1,5 – 3,0 detik</span>
+      </div>
+      <div class="ttc-item">
+        <span>Aman</span>
+        <span class="badge bd-g">TTC &ge; 3,0 detik</span>
+      </div>
+    </div>
+
+    <div class="card" style="padding:14px 16px;font-size:12.5px;color:var(--tx2);line-height:1.7;box-shadow:var(--sh)">
+      <strong style="color:var(--tx)">Privasi:</strong> Sistem tidak menyimpan atau membaca plat nomor kendaraan. Hanya data statistik lalu lintas yang disimpan dalam database.
+    </div>
+  </div>
+</div>
+</form>
+
+<script>
+const fi=document.getElementById('fileInput'),dz=document.getElementById('dropzone');
+const fp=document.getElementById('filePreview'),fn=document.getElementById('fpName'),fs=document.getElementById('fpSize');
+fi.addEventListener('change',function(){if(this.files[0]){const f=this.files[0];fn.textContent=f.name;fs.textContent=(f.size/1024/1024).toFixed(1)+' MB';fp.classList.add('show')}});
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0]){fi.files=e.dataTransfer.files;fi.dispatchEvent(new Event('change'))}});
+
+document.getElementById('uploadForm').addEventListener('submit',function(){
+  if(!fi.files[0]){alert('Pilih file video terlebih dahulu.');return false;}
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;
+  btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Mengunggah...';
+  document.getElementById('uploadProgress').style.display='block';
+  let p=0;const iv=setInterval(()=>{p=Math.min(p+Math.random()*15,90);document.getElementById('uploadBar').style.width=p+'%';document.getElementById('uploadPct').textContent=Math.round(p)+'%';},200);
+  return true;
+});
+</script>
+{% endblock %}

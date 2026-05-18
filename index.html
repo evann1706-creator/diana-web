@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Beranda{% endblock %}
+{% block topbar_title %}Beranda{% endblock %}
+{% block topbar_sub %}Selamat datang di platform deteksi kecelakaan DIANA{% endblock %}
+{% block head %}
+<style>
+.hero{background:var(--pri);border-radius:var(--r);padding:36px 40px;margin-bottom:24px;position:relative;overflow:hidden;color:#fff}
+.hero::before{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.06)}
+.hero::after{content:'';position:absolute;right:60px;bottom:-80px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);padding:5px 13px;border-radius:20px;font-size:11.5px;font-weight:600;letter-spacing:.03em;margin-bottom:16px}
+.hero h1{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:10px;letter-spacing:-.5px}
+.hero p{font-size:14px;opacity:.85;max-width:520px;line-height:1.7;margin-bottom:24px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.hero-btn-wh{background:#fff;color:var(--pri);padding:10px 22px;border-radius:var(--rsm);font-size:13.5px;font-weight:700;transition:.15s}
+.hero-btn-wh:hover{opacity:.92}
+.hero-btn-ol{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.35);color:#fff;padding:10px 22px;border-radius:var(--rsm);font-size:13.5px;font-weight:600;transition:.15s}
+.hero-btn-ol:hover{background:rgba(255,255,255,.25)}
+.hero-stats{display:flex;gap:32px;margin-top:28px;flex-wrap:wrap}
+.hs-item{text-align:center}
+.hs-val{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1}
+.hs-lbl{font-size:11px;opacity:.7;margin-top:2px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.feature-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.fc{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:20px;box-shadow:var(--sh);transition:border-color .15s}
+.fc:hover{border-color:var(--pri)}
+.fc-icon{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.fc-title{font-size:14px;font-weight:700;margin-bottom:5px}
+.fc-desc{font-size:12.5px;color:var(--tx2);line-height:1.6}
+.news-card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);transition:transform .15s,box-shadow .15s}
+.news-card:hover{transform:translateY(-2px);box-shadow:var(--shm)}
+.news-img{width:100%;height:150px;object-fit:cover;background:#f3f4f6}
+.news-img-placeholder{width:100%;height:150px;background:var(--pri-l);display:flex;align-items:center;justify-content:center}
+.news-body{padding:14px 16px}
+.news-cat{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--pri);margin-bottom:6px}
+.news-title{font-size:13.5px;font-weight:700;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.news-date{font-size:11px;color:var(--tx3)}
+
+.pipeline-row{display:flex;align-items:center;gap:0;background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:24px}
+.pipe-step{flex:1;padding:18px 12px;text-align:center;border-right:1px solid var(--bd);position:relative}
+.pipe-step:last-child{border-right:none}
+.pipe-num{width:28px;height:28px;border-radius:50%;background:var(--pri-l);color:var(--pri);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.pipe-title{font-size:12px;font-weight:700;margin-bottom:2px}
+.pipe-desc{font-size:11px;color:var(--tx2)}
+
+@media(max-width:900px){.two-col{grid-template-columns:1fr}.feature-row{grid-template-columns:1fr 1fr}}
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- HERO BANNER -->
+<div class="hero">
+  <div class="hero-tag">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Platform Keselamatan Jalan — LKTI Nasional 2026
+  </div>
+  <h1>Deteksi & Prediksi Kecelakaan<br>Lalu Lintas Berbasis AI</h1>
+  <p>DIANA menganalisis video CCTV ATCS menggunakan YOLOv8, ByteTrack, dan model TTC untuk mengidentifikasi risiko kecelakaan dan menghasilkan data keselamatan PKJI 2023 secara otomatis.</p>
+  <div class="hero-btns">
+    {% if current_user() %}
+    <a href="{{ url_for('upload') }}" class="hero-btn-wh">Upload Video Sekarang</a>
+    <a href="{{ url_for('dashboard') }}" class="hero-btn-ol">Lihat Dashboard</a>
+    {% else %}
+    <a href="{{ url_for('register') }}" class="hero-btn-wh">Daftar Gratis</a>
+    <a href="{{ url_for('dashboard') }}" class="hero-btn-ol">Dashboard Publik</a>
+    {% endif %}
+  </div>
+  <div class="hero-stats">
+    <div class="hs-item"><div class="hs-val">{{ stats.total_sessions }}</div><div class="hs-lbl">Video Dianalisis</div></div>
+    <div class="hs-item"><div class="hs-val">{{ stats.total_danger }}</div><div class="hs-lbl">Kejadian Bahaya</div></div>
+    <div class="hs-item"><div class="hs-val">{{ stats.total_vehicles }}</div><div class="hs-lbl">Kendaraan Terdeteksi</div></div>
+    <div class="hs-item"><div class="hs-val">{{ stats.total_users }}</div><div class="hs-lbl">Pengguna Terdaftar</div></div>
+  </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="stat-grid">
+  <div class="scard sc-b"><div class="si si-b"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div><div class="sv" style="color:var(--pri)">{{ stats.total_sessions }}</div><div class="sl">Sesi Analisis Selesai</div></div>
+  <div class="scard sc-r"><div class="si si-r"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div><div class="sv" style="color:var(--red)">{{ stats.total_danger }}</div><div class="sl">Kejadian Bahaya TTC</div></div>
+  <div class="scard sc-g"><div class="si si-g"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div class="sv" style="color:var(--grn)">{{ stats.total_vehicles }}</div><div class="sl">Total Kendaraan Terdeteksi</div></div>
+  <div class="scard sc-a"><div class="si si-a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><div class="sv" style="color:var(--amb)">{{ stats.total_users }}</div><div class="sl">Pengguna Terdaftar</div></div>
+</div>
+
+<!-- PIPELINE -->
+<div class="pipeline-row">
+  {% for num,title,desc in [('1','Upload MP4','Video dari CCTV ATCS'),('2','Ekstraksi Frame','OpenCV preprocessing'),('3','YOLOv8','Deteksi KR · KB · SM'),('4','ByteTrack','Track ID persisten'),('5','Kecepatan & TTC','EMA + Hayward 1972'),('6','PKJI 2023','smp/jam · DJ · TP'),('7','Dashboard','Grafik + Alert + Ekspor')] %}
+  <div class="pipe-step"><div class="pipe-num">{{num}}</div><div class="pipe-title">{{title}}</div><div class="pipe-desc">{{desc}}</div></div>
+  {% endfor %}
+</div>
+
+<!-- FEATURES + NEWS -->
+<div class="two-col">
+  <div>
+    <div style="font-size:15px;font-weight:800;margin-bottom:14px">Fitur Utama Platform</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      {% for icon_path,title,desc,color in [
+        ('M9 11l3 3L22 4','Deteksi YOLOv8','Mengklasifikasikan KR, KB, SM sesuai PKJI 2023 secara akurat.','#eff6ff'),
+        ('M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z','Prediksi TTC Real-time','Alert bahaya saat TTC < 1.5 detik (BAHAYA) atau 1.5–3.0 detik (WASPADA).','#fef2f2'),
+        ('M3 3h18v18H3z','Output PKJI 2023','Volume smp/jam, Derajat Kejenuhan, Tingkat Pelayanan A–F.','#f0fdf4'),
+        ('M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z','Peta Titik Rawan','Visualisasi lokasi kejadian bahaya di Kabupaten Banyumas.','#fffbeb')
+      ] %}
+      <div class="card" style="padding:14px 16px;display:flex;gap:12px;align-items:flex-start">
+        <div style="width:36px;height:36px;border-radius:8px;background:{{color}};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--pri)" stroke-width="2"><path d="{{ icon_path }}"/></svg>
+        </div>
+        <div><div style="font-size:13px;font-weight:700;margin-bottom:3px">{{ title }}</div><div style="font-size:12px;color:var(--tx2)">{{ desc }}</div></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- NEWS -->
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:800">Berita Terkini</div>
+      <a href="{{ url_for('edukasi') }}" style="font-size:12px;color:var(--pri);font-weight:600">Lihat semua</a>
+    </div>
+    {% if news %}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      {% for n in news %}
+      <div class="card" style="padding:14px 16px">
+        <div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--pri);margin-bottom:4px">{{ n.category }}</div>
+        <div style="font-size:13.5px;font-weight:700;margin-bottom:4px;line-height:1.4">{{ n.title }}</div>
+        <div style="font-size:12px;color:var(--tx2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ n.content }}</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:6px">{{ n.created_at.strftime('%d %b %Y') }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="padding:32px;text-align:center;color:var(--tx2)">Belum ada berita.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

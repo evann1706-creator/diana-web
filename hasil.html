@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}Hasil Analisis — {{ vs.road_name }}{% endblock %}
+{% block topbar_title %}Hasil Analisis{% endblock %}
+{% block topbar_sub %}{{ vs.road_name }} · {{ vs.cctv_date }}{% endblock %}
+{% block content %}
+<style>
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.rc{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:18px;text-align:center;box-shadow:var(--sh);position:relative;overflow:hidden}
+.rc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 var(--r) var(--r)}
+.rc.b::after{background:var(--pri)}.rc.r::after{background:var(--red)}.rc.g::after{background:var(--grn)}.rc.a::after{background:var(--amb)}
+.rc-v{font-size:30px;font-weight:800;line-height:1;letter-spacing:-.5px;margin:6px 0 3px}
+.rc-l{font-size:11.5px;color:var(--tx2);font-weight:500}
+.rc-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px}
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px}
+.pkji-row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-radius:8px;margin-bottom:6px}
+.pkji-key{font-size:13px;color:var(--tx2);font-weight:500}
+.pkji-val{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.event-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6}
+.event-item:last-child{border-bottom:none}
+.ev-cat{width:80px;flex-shrink:0}
+.ev-detail{flex:1;font-size:12.5px;color:var(--tx2)}
+.ev-detail strong{color:var(--tx);font-weight:700}
+@media(max-width:900px){.result-grid{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}}
+</style>
+
+<div class="ph">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <h1>{{ vs.road_name }}</h1>
+      <p>Tanggal: {{ vs.cctv_date }} {{ vs.cctv_time }} · Diunggah oleh: {{ vs.user.username }} · <span class="schip ch-done">Selesai</span></p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a href="{{ url_for('riwayat') }}" class="btn btn-out btn-sm">← Kembali</a>
+      {% if vs.status == 'done' %}
+        {% if vs.has_excel %}
+        <a href="{{ url_for('download_excel', sid=vs.id) }}" class="btn btn-pri btn-sm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Excel (Multi-Sheet)
+        </a>
+        {% else %}
+        <span class="btn btn-out btn-sm" style="opacity:.5">Excel (sedang dibuat...)</span>
+        {% endif %}
+        {% if vs.has_video %}
+        <a href="{{ url_for('download_video', sid=vs.id) }}" class="btn btn-out btn-sm">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          Download Video Anotasi
+        </a>
+        {% else %}
+        <span class="btn btn-out btn-sm" style="opacity:.5">Video (sedang dibuat...)</span>
+        {% endif %}
+      {% endif %}
+    </div>
+
+    {% if vs.status == 'done' %}
+    <div style="margin-top:8px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12.5px;color:#14532d">
+      <strong>Output tersedia:</strong>
+      Excel multi-sheet (Lajur A-1/A-2/B-1/B-2, Ringkasan, PKJI 2023, Kejadian TTC) &amp;
+      Video MP4 dengan HUD + bounding box + TTC per kendaraan.
+      Jika download gagal, pastikan proses YOLO selesai sempurna di terminal.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- PKJI RESULT CARDS -->
+<div class="result-grid">
+  <div class="rc b"><div class="rc-icon" style="background:#eff6ff;color:var(--pri)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div class="rc-v" style="color:var(--pri)">{{ vs.total_veh }}</div><div class="rc-l">Total Kendaraan</div></div>
+  <div class="rc r"><div class="rc-icon" style="background:#fef2f2;color:var(--red)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div><div class="rc-v" style="color:var(--red)">{{ vs.danger_ev }}</div><div class="rc-l">Kejadian BAHAYA</div></div>
+  <div class="rc a"><div class="rc-icon" style="background:#fffbeb;color:var(--amb)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></div><div class="rc-v" style="color:var(--amb)">{{ "%.1f"|format(vs.avg_speed) }} <span style="font-size:14px">km/h</span></div><div class="rc-l">Kecepatan Rata-rata</div></div>
+  <div class="rc g"><div class="rc-icon" style="background:#f0fdf4;color:var(--grn)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="rc-v" style="color:var(--grn)">{{ vs.tp }}</div><div class="rc-l">Tingkat Pelayanan</div></div>
+</div>
+
+<!-- CHARTS + PKJI -->
+<div class="two-col">
+  <!-- TTC Scatter Chart -->
+  <div class="card">
+    <div class="ch"><div class="ct">Grafik Kejadian TTC (Time-to-Collision)</div><span style="font-size:12px;color:var(--tx2)">{{ events|length }} kejadian tercatat</span></div>
+    <div class="cb"><canvas id="ttcChart" height="160"></canvas>
+      <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px"><div style="width:10px;height:10px;border-radius:50%;background:#dc2626"></div>BAHAYA (TTC &lt; 1.5s) — {{ danger|length }}</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px"><div style="width:10px;height:10px;border-radius:50%;background:#d97706"></div>WASPADA (1.5–3.0s) — {{ warning|length }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PKJI Summary -->
+  <div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="ch"><div class="ct">Output PKJI 2023</div></div>
+      <div class="cb">
+        <div class="pkji-row" style="background:#eff6ff"><div class="pkji-key">KR (Kendaraan Ringan)</div><div class="pkji-val" style="color:var(--pri)">{{ vs.total_kr }} kend.</div></div>
+        <div class="pkji-row" style="background:#fef2f2"><div class="pkji-key">KB (Kendaraan Berat)</div><div class="pkji-val" style="color:var(--red)">{{ vs.total_kb }} kend.</div></div>
+        <div class="pkji-row" style="background:#fffbeb"><div class="pkji-key">SM (Sepeda Motor)</div><div class="pkji-val" style="color:var(--amb)">{{ vs.total_sm }} kend.</div></div>
+        <div class="divider"></div>
+        <div class="pkji-row" style="background:#f9fafb"><div class="pkji-key">Volume Q</div><div class="pkji-val">{{ vs.q_smp }} smp/jam</div></div>
+        <div class="pkji-row" style="background:#f9fafb"><div class="pkji-key">Derajat Kejenuhan</div><div class="pkji-val">{{ vs.dj }}</div></div>
+        <div class="pkji-row" style="background:#f9fafb"><div class="pkji-key">Tingkat Pelayanan</div><div class="pkji-val" style="color:{% if vs.tp in ['A','B'] %}var(--grn){% elif vs.tp == 'C' %}var(--amb){% else %}var(--red){% endif %}">{{ vs.tp }}</div></div>
+      </div>
+    </div>
+
+    <!-- Composition donut -->
+    <div class="card" style="padding:16px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">Komposisi Kendaraan</div>
+      <canvas id="compChart" height="130"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- DANGER EVENTS TABLE -->
+<div class="card">
+  <div class="ch">
+    <div class="ct">Log Kejadian Bahaya & Waspada</div>
+    <span style="font-size:12px;color:var(--tx2)">{{ events|length }} kejadian total</span>
+  </div>
+  <div class="cb">
+    {% if events %}
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Waktu</th><th>Frame</th><th>TTC (detik)</th><th>Kategori</th><th>V. Belakang</th><th>V. Depan</th><th>Jarak</th><th>Jalur</th></tr></thead>
+        <tbody>
+          {% for e in events[:30] %}
+          <tr>
+            <td class="mono">{{ loop.index }}</td>
+            <td class="mono">{{ "%.1f"|format(e.timestamp_s) }}s</td>
+            <td class="mono">{{ e.frame_no }}</td>
+            <td class="mono" style="font-weight:700;color:{% if e.category=='BAHAYA' %}var(--red){% else %}var(--amb){% endif %}">{{ e.ttc_value }}</td>
+            <td><span class="schip {% if e.category=='BAHAYA' %}ch-err{% else %}ch-pend{% endif %}">{{ e.category }}</span></td>
+            <td class="mono">{{ e.v_back }} km/h</td>
+            <td class="mono">{{ e.v_front }} km/h</td>
+            <td class="mono">{{ e.distance_m }} m</td>
+            <td><span class="badge bd-gray">{{ e.lane }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if events|length > 30 %}
+    <div style="text-align:center;padding:12px;font-size:13px;color:var(--tx2)">Menampilkan 30 dari {{ events|length }} kejadian.</div>
+    {% endif %}
+    {% else %}
+    <div style="text-align:center;padding:32px;color:var(--grn)">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:8px"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div style="font-weight:700">Tidak ada kejadian bahaya!</div>
+      <div style="font-size:13px;color:var(--tx2);margin-top:4px">Semua kendaraan dalam kondisi jarak aman.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+// TTC Scatter
+const ttcDanger  = {{ danger  | map(attribute='ttc_value') | list | tojson }};
+const ttcWarning = {{ warning | map(attribute='ttc_value') | list | tojson }};
+const ttcTDanger  = {{ danger  | map(attribute='timestamp_s') | list | tojson }};
+const ttcTWarning = {{ warning | map(attribute='timestamp_s') | list | tojson }};
+new Chart(document.getElementById('ttcChart'),{
+  type:'scatter',
+  data:{datasets:[
+    {label:'BAHAYA',data:ttcTDanger.map((t,i)=>({x:t,y:ttcDanger[i]})),backgroundColor:'rgba(220,38,38,.7)',pointRadius:5},
+    {label:'WASPADA',data:ttcTWarning.map((t,i)=>({x:t,y:ttcWarning[i]})),backgroundColor:'rgba(217,119,6,.65)',pointRadius:4}
+  ]},
+  options:{responsive:true,plugins:{legend:{display:false}},scales:{
+    x:{title:{display:true,text:'Waktu (detik)'},grid:{color:'#f3f4f6'},ticks:{font:{size:10}}},
+    y:{title:{display:true,text:'TTC (detik)'},min:0,max:3.5,grid:{color:'#f3f4f6'},ticks:{font:{size:10}}}
+  }}
+});
+// Composition
+new Chart(document.getElementById('compChart'),{
+  type:'doughnut',
+  data:{labels:['KR','KB','SM'],datasets:[{data:[{{ vs.total_kr }},{{ vs.total_kb }},{{ vs.total_sm }}],backgroundColor:['#1a56db','#dc2626','#d97706'],borderWidth:0,hoverOffset:5}]},
+  options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10}}}}
+});
+</script>
+{% endblock %}
+{% endblock %}

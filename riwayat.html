@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block title %}Pengajuan & Riwayat{% endblock %}
+{% block topbar_title %}Pengajuan & Riwayat{% endblock %}
+{% block topbar_sub %}Status proses dan hasil analisis video{% endblock %}
+{% block content %}
+<style>
+.riwayat-item{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:18px 20px;margin-bottom:12px;box-shadow:var(--sh);transition:border-color .15s}
+.riwayat-item:hover{border-color:rgba(26,86,219,.3)}
+.ri-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:12px}
+.ri-title{font-size:15px;font-weight:700;margin-bottom:3px}
+.ri-meta{font-size:12px;color:var(--tx2)}
+.ri-body{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+.ri-stat{text-align:center;padding:10px 6px;background:var(--bg);border-radius:var(--rsm)}
+.ri-sv{font-size:18px;font-weight:800;line-height:1;margin-bottom:2px}
+.ri-sl{font-size:11px;color:var(--tx2)}
+.ri-foot{display:flex;align-items:center;gap:10px}
+.progress-section{margin-bottom:10px}
+.prog-label{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12.5px}
+.action-btns{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:700px){.ri-body{grid-template-columns:1fr 1fr}}
+</style>
+
+<div class="ph">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div><h1>Pengajuan & Riwayat</h1><p>Pantau status proses video dan lihat hasil analisis</p></div>
+    <a href="{{ url_for('upload') }}" class="btn btn-pri"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload Baru</a>
+  </div>
+</div>
+
+{% if pending > 0 %}
+<div style="background:#eff6ff;border:1px solid rgba(26,86,219,.2);border-radius:var(--r);padding:13px 18px;margin-bottom:18px;display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--pri)">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+  <strong>{{ pending }} video sedang dalam proses.</strong> Halaman akan memperbarui otomatis setiap 5 detik.
+</div>
+{% endif %}
+
+{% if sessions %}
+<div id="sessions-list">
+{% for s in sessions %}
+<div class="riwayat-item" id="sess-{{ s.id }}" data-sid="{{ s.id }}" data-status="{{ s.status }}">
+  <div class="ri-header">
+    <div>
+      <div class="ri-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx2)" stroke-width="2" style="margin-right:6px;vertical-align:middle"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        {{ s.road_name }}
+      </div>
+      <div class="ri-meta">{{ s.orig_name }} · Diunggah {{ s.upload_date.strftime('%d %b %Y, %H:%M') }} · Tanggal CCTV: {{ s.cctv_date }} {{ s.cctv_time }}</div>
+    </div>
+    <div class="status-wrap" id="chip-{{ s.id }}">
+      {% if s.status == 'done' %}<span class="schip ch-done">Selesai</span>
+      {% elif s.status == 'processing' %}<span class="schip ch-proc">Sedang Diproses</span>
+      {% elif s.status == 'pending' %}<span class="schip ch-pend">Menunggu</span>
+      {% else %}<span class="schip ch-err">Error</span>{% endif %}
+    </div>
+  </div>
+
+  {% if s.status in ['pending', 'processing'] %}
+  <div class="progress-section" id="prog-wrap-{{ s.id }}">
+    <div class="prog-label">
+      <span class="mono" id="prog-msg-{{ s.id }}">
+        {% if s.status == 'pending' %}Menunggu antrian...
+        {% else %}{{ s.progress_msg or 'Menganalisis video...' }}{% endif %}
+      </span>
+      <span class="mono" style="font-weight:600" id="prog-pct-{{ s.id }}">{{ s.progress }}%</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="prog-bar-{{ s.id }}" style="width:{{ s.progress }}%"></div></div>
+    <div style="font-size:11px;color:var(--tx2);margin-top:4px">
+      Tanggal: {{ s.cctv_date }} {{ s.cctv_time }} · Lajur: {{ s.n_lanes }}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if s.status == 'done' %}
+  <div class="ri-body">
+    <div class="ri-stat"><div class="ri-sv" style="color:var(--grn)">{{ s.total_veh }}</div><div class="ri-sl">Total Kendaraan</div></div>
+    <div class="ri-stat"><div class="ri-sv" style="color:var(--red)">{{ s.danger_ev }}</div><div class="ri-sl">Kejadian Bahaya</div></div>
+    <div class="ri-stat"><div class="ri-sv" style="color:var(--pri)">{{ "%.1f"|format(s.avg_speed) }}</div><div class="ri-sl">Avg Speed (km/h)</div></div>
+    <div class="ri-stat"><div class="ri-sv" style="color:var(--amb)">{{ s.tp }}</div><div class="ri-sl">Tingkat Pelayanan</div></div>
+  </div>
+  <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">
+    KR: <strong>{{ s.total_kr }}</strong> · KB: <strong>{{ s.total_kb }}</strong> · SM: <strong>{{ s.total_sm }}</strong>
+    · DJ: <strong>{{ s.dj }}</strong> · Q: <strong>{{ s.q_smp }} smp/jam</strong>
+    · Lajur: <strong>{{ s.n_lanes }}</strong>
+  </div>
+  <div class="action-btns">
+    <a href="{{ url_for('hasil', sid=s.id) }}" class="btn btn-pri btn-sm">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Lihat Hasil
+    </a>
+    {% if s.has_excel %}
+    <a href="{{ url_for('download_excel', sid=s.id) }}" class="btn btn-out btn-sm" title="Download Excel multi-sheet">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Excel
+    </a>
+    {% endif %}
+    {% if s.has_video %}
+    <a href="{{ url_for('download_video', sid=s.id) }}" class="btn btn-out btn-sm" title="Download video anotasi">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      Video
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="card" style="padding:48px;text-align:center">
+  <div style="width:56px;height:56px;border-radius:14px;background:var(--pri-l);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--pri)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+  </div>
+  <div style="font-size:16px;font-weight:700;margin-bottom:8px">Belum Ada Video</div>
+  <div style="font-size:13.5px;color:var(--tx2);margin-bottom:20px">Upload video CCTV pertama Anda untuk mulai menganalisis.</div>
+  <a href="{{ url_for('upload') }}" class="btn btn-pri" style="display:inline-flex">Upload Video Sekarang</a>
+</div>
+{% endif %}
+
+{% block scripts %}
+<script>
+// Live polling for processing sessions
+const processingIds = {{ sessions | selectattr('status', 'in', ['pending', 'processing']) | map(attribute='id') | list | tojson }};
+
+function pollProgress(){
+  processingIds.forEach(sid => {
+    fetch(`/api/progress/${sid}`)
+      .then(r => r.json())
+      .then(d => {
+        const bar  = document.getElementById(`prog-bar-${sid}`);
+        const pct  = document.getElementById(`prog-pct-${sid}`);
+        const msg  = document.getElementById(`prog-msg-${sid}`);
+        const chip = document.getElementById(`chip-${sid}`);
+        if(bar) bar.style.width = d.progress + '%';
+        if(pct) pct.textContent = d.progress + '%';
+        if(msg && d.msg) msg.textContent = d.msg;
+        else if(msg) msg.textContent = d.status === 'processing' ? 'Menganalisis video...' : d.status === 'pending' ? 'Menunggu antrian...' : 'Selesai!';
+
+        if(d.status === 'done'){
+          if(chip) chip.innerHTML = '<span class="schip ch-done">Selesai</span>';
+          const pw = document.getElementById(`prog-wrap-${sid}`);
+          if(pw) pw.style.display = 'none';
+          if('Notification' in window && Notification.permission === 'granted'){
+            new Notification('DIANA — Analisis Selesai!', {
+              body: `Video selesai dianalisis. ${d.danger_ev} kejadian bahaya ditemukan. ${d.total_veh} kendaraan terdeteksi.`
+            });
+          }
+          setTimeout(() => location.reload(), 1800);
+        }
+        if(d.status === 'error'){
+          if(chip) chip.innerHTML = '<span class="schip ch-err">Error</span>';
+          const pw = document.getElementById(`prog-wrap-${sid}`);
+          if(pw) pw.style.display = 'none';
+          setTimeout(() => location.reload(), 2000);
+        }
+      }).catch(()=>{});
+  });
+}
+
+if(processingIds.length > 0){
+  setInterval(pollProgress, 4000);
+  pollProgress();
+  // Request notification permission
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
+}
+</script>
+{% endblock %}
+{% endblock %}

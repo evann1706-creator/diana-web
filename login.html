@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masuk — DIANA Detector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;display:flex;background:#f0f2f8}
+a{color:inherit;text-decoration:none}
+
+/* LEFT PANEL */
+.left{width:420px;flex-shrink:0;background:#1a56db;display:flex;flex-direction:column;justify-content:space-between;padding:44px 44px 36px;position:relative;overflow:hidden}
+.left::before{content:'';position:absolute;right:-80px;top:-80px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.06)}
+.left::after{content:'';position:absolute;left:-40px;bottom:-60px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.04)}
+.l-brand{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.l-icon{width:48px;height:48px;border-radius:13px;background:rgba(255,255,255,.15);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.25)}
+.l-name{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.4px;line-height:1.2}
+.l-sub{font-size:11px;color:rgba(255,255,255,.65);letter-spacing:.3px;margin-top:2px}
+.l-middle{position:relative;z-index:1}
+.l-headline{font-size:30px;font-weight:800;color:#fff;line-height:1.35;letter-spacing:-.5px;margin-bottom:16px}
+.l-headline span{color:rgba(255,255,255,.55)}
+.l-desc{font-size:14px;color:rgba(255,255,255,.7);line-height:1.75;margin-bottom:32px}
+.l-chips{display:flex;flex-direction:column;gap:10px}
+.l-chip{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px 14px;color:#fff}
+.l-chip-ic{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.l-chip-title{font-size:13px;font-weight:700}
+.l-chip-sub{font-size:11.5px;color:rgba(255,255,255,.6);margin-top:1px}
+.l-foot{font-size:11.5px;color:rgba(255,255,255,.45);position:relative;z-index:1}
+
+/* RIGHT PANEL */
+.right{flex:1;display:flex;align-items:center;justify-content:center;padding:32px}
+.form-box{width:100%;max-width:420px}
+.fb-title{font-size:24px;font-weight:800;color:#111827;letter-spacing:-.4px;margin-bottom:5px}
+.fb-sub{font-size:14px;color:#6b7280;margin-bottom:32px}
+.fg{margin-bottom:18px}
+.fl{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:7px}
+.fi{width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:11px 13px;font-size:14px;font-family:inherit;color:#111827;background:#fff;outline:none;transition:all .15s}
+.fi:focus{border-color:#1a56db;box-shadow:0 0 0 3px rgba(26,86,219,.09)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.btn-pri{background:#1a56db;color:#fff}
+.btn-pri:hover{background:#1547c0}
+.divider{display:flex;align-items:center;gap:12px;margin:22px 0;font-size:12px;color:#9ca3af}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:#e5e7eb}
+.switch-link{text-align:center;font-size:13.5px;color:#6b7280}
+.switch-link a{color:#1a56db;font-weight:700}
+.switch-link a:hover{text-decoration:underline}
+.flash{padding:11px 14px;border-radius:8px;font-size:13.5px;margin-bottom:18px;border-left:4px solid;display:flex;align-items:center;gap:9px}
+.flash.danger{background:#fef2f2;border-color:#dc2626;color:#7f1d1d}
+.flash.success{background:#f0fdf4;border-color:#16a34a;color:#14532d}
+.flash.warning{background:#fffbeb;border-color:#d97706;color:#78350f}
+
+@media(max-width:768px){
+  .left{display:none}
+  .right{padding:24px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT -->
+<div class="left">
+  <div class="l-brand">
+    <div class="l-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="l-name">DIANA Detector</div>
+      <div class="l-sub">RSTJ-C Muda · PKTJ Tegal</div>
+    </div>
+  </div>
+
+  <div class="l-middle">
+    <div class="l-headline">Deteksi Risiko<br>Kecelakaan <span>dengan AI</span></div>
+    <div class="l-desc">Platform analisis video CCTV berbasis YOLOv8 untuk mendeteksi potensi kecelakaan lalu lintas di simpang Kabupaten Banyumas.</div>
+    <div class="l-chips">
+      <div class="l-chip">
+        <div class="l-chip-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 11l3 3 8-8"/></svg></div>
+        <div><div class="l-chip-title">Akurasi 97.3%</div><div class="l-chip-sub">YOLOv8 + ByteTrack</div></div>
+      </div>
+      <div class="l-chip">
+        <div class="l-chip-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div>
+        <div><div class="l-chip-title">Prediksi TTC Real-time</div><div class="l-chip-sub">Standar Hayward 1972</div></div>
+      </div>
+      <div class="l-chip">
+        <div class="l-chip-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>
+        <div><div class="l-chip-title">Output PKJI 2023</div><div class="l-chip-sub">Q smp/jam · DJ · TP A–F</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="l-foot">LKTI Nasional PKTJ 2026 · Tim DIANA · Keselamatan Transportasi</div>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+  <div class="form-box">
+    <div class="fb-title">Masuk ke Akun</div>
+    <div class="fb-sub">Belum punya akun? <a href="/register">Daftar di sini</a></div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat,msg in messages %}
+    <div class="flash {{ cat }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{ msg }}</div>
+    {% endfor %}{% endif %}{% endwith %}
+
+    <form method="POST">
+      <div class="fg">
+        <label class="fl">Username atau Email</label>
+        <input type="text" name="identifier" class="fi" placeholder="Masukkan username atau email" required autofocus>
+      </div>
+      <div class="fg">
+        <label class="fl">Password</label>
+        <input type="password" name="password" class="fi" placeholder="Masukkan password" required>
+      </div>
+      <button type="submit" class="btn btn-pri">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Masuk
+      </button>
+    </form>
+
+    <div class="divider">atau</div>
+    <div class="switch-link">
+      Belum punya akun? <a href="/register">Daftar Sekarang</a>
+    </div>
+
+    <div style="margin-top:28px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:13px 16px;font-size:12px;color:#6b7280;line-height:1.7">
+      <strong style="color:#374151;display:block;margin-bottom:4px">Akun Demo:</strong>
+      Admin: <code style="background:#e5e7eb;padding:1px 5px;border-radius:4px">admin</code> / <code style="background:#e5e7eb;padding:1px 5px;border-radius:4px">admin123</code><br>
+      User: <code style="background:#e5e7eb;padding:1px 5px;border-radius:4px">demo</code> / <code style="background:#e5e7eb;padding:1px 5px;border-radius:4px">demo123</code>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

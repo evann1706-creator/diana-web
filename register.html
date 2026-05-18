@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daftar — DIANA Detector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;display:flex;background:#f0f2f8}
+a{color:inherit;text-decoration:none}
+.left{width:380px;flex-shrink:0;background:#1a56db;display:flex;flex-direction:column;justify-content:space-between;padding:44px 40px 36px;position:relative;overflow:hidden}
+.left::before{content:'';position:absolute;right:-70px;top:-70px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.07)}
+.left::after{content:'';position:absolute;left:-50px;bottom:-70px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.05)}
+.l-brand{display:flex;align-items:center;gap:13px;position:relative;z-index:1}
+.l-icon{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.25)}
+.l-name{font-size:19px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.l-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:2px}
+.l-steps{position:relative;z-index:1}
+.step-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:18px}
+.step{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
+.step-dot{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px}
+.step-dot.done{background:rgba(255,255,255,.9);color:#1a56db}
+.step-text{font-size:13px;color:rgba(255,255,255,.8);line-height:1.55;padding-top:3px}
+.step-text strong{color:#fff;font-weight:700;display:block;font-size:13px;margin-bottom:1px}
+.l-foot{font-size:11.5px;color:rgba(255,255,255,.4);position:relative;z-index:1}
+.right{flex:1;display:flex;align-items:center;justify-content:center;padding:32px}
+.form-box{width:100%;max-width:460px}
+.fb-title{font-size:24px;font-weight:800;color:#111827;letter-spacing:-.4px;margin-bottom:5px}
+.fb-sub{font-size:14px;color:#6b7280;margin-bottom:28px}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:7px}
+.fspan{color:#dc2626}
+.fi{width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:11px 13px;font-size:14px;font-family:inherit;color:#111827;background:#fff;outline:none;transition:all .15s}
+.fi:focus{border-color:#1a56db;box-shadow:0 0 0 3px rgba(26,86,219,.09)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fhint{font-size:11.5px;color:#9ca3af;margin-top:4px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s;margin-top:6px}
+.btn-pri{background:#1a56db;color:#fff}.btn-pri:hover{background:#1547c0}
+.switch-link{text-align:center;font-size:13.5px;color:#6b7280;margin-top:20px}
+.switch-link a{color:#1a56db;font-weight:700}
+.flash{padding:11px 14px;border-radius:8px;font-size:13.5px;margin-bottom:16px;border-left:4px solid;display:flex;align-items:center;gap:9px}
+.flash.danger{background:#fef2f2;border-color:#dc2626;color:#7f1d1d}
+.flash.success{background:#f0fdf4;border-color:#16a34a;color:#14532d}
+@media(max-width:768px){.left{display:none}.right{padding:24px 18px}}
+</style>
+</head>
+<body>
+
+<div class="left">
+  <div class="l-brand">
+    <div class="l-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+    <div><div class="l-name">DIANA Detector</div><div class="l-sub">RSTJ-C Muda · PKTJ Tegal</div></div>
+  </div>
+
+  <div class="l-steps">
+    <div class="step-title">Cara Mulai Menggunakan DIANA</div>
+    <div class="step"><div class="step-dot done">1</div><div class="step-text"><strong>Daftar Akun</strong>Isi username, email, dan password untuk membuat akun baru.</div></div>
+    <div class="step"><div class="step-dot">2</div><div class="step-text"><strong>Login</strong>Masuk menggunakan username dan password yang telah didaftarkan.</div></div>
+    <div class="step"><div class="step-dot">3</div><div class="step-text"><strong>Upload Video CCTV</strong>Unggah rekaman MP4 dari ATCS atau dashcam beserta informasi lokasi dan waktu.</div></div>
+    <div class="step"><div class="step-dot">4</div><div class="step-text"><strong>Proses Otomatis</strong>Sistem menganalisis video menggunakan YOLOv8 + ByteTrack secara otomatis.</div></div>
+    <div class="step"><div class="step-dot">5</div><div class="step-text"><strong>Lihat Hasil</strong>Dashboard menampilkan statistik PKJI 2023, grafik TTC, dan kejadian bahaya.</div></div>
+  </div>
+
+  <div class="l-foot">LKTI Nasional PKTJ 2026 · Tim DIANA</div>
+</div>
+
+<div class="right">
+  <div class="form-box">
+    <div class="fb-title">Buat Akun Baru</div>
+    <div class="fb-sub">Sudah punya akun? <a href="/login" style="color:#1a56db;font-weight:700">Masuk di sini</a></div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for cat,msg in messages %}
+    <div class="flash {{ cat }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>{{ msg }}</div>
+    {% endfor %}{% endif %}{% endwith %}
+
+    <form method="POST">
+      <div class="fg">
+        <label class="fl">Username <span class="fspan">*</span></label>
+        <input type="text" name="username" class="fi" placeholder="Pilih username unik" required>
+        <div class="fhint">Minimal 3 karakter, tanpa spasi</div>
+      </div>
+      <div class="fg">
+        <label class="fl">Email <span class="fspan">*</span></label>
+        <input type="email" name="email" class="fi" placeholder="contoh@email.com" required>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label class="fl">Password <span class="fspan">*</span></label>
+          <input type="password" name="password" class="fi" placeholder="Min. 6 karakter" required>
+        </div>
+        <div class="fg">
+          <label class="fl">Konfirmasi Password <span class="fspan">*</span></label>
+          <input type="password" name="confirm" class="fi" placeholder="Ulangi password" required>
+        </div>
+      </div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:11px 14px;font-size:12.5px;color:#78350f;margin-bottom:16px;line-height:1.6">
+        Dengan mendaftar, Anda menyetujui penggunaan data analisis video untuk keperluan penelitian keselamatan jalan.
+      </div>
+      <button type="submit" class="btn btn-pri">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        Buat Akun
+      </button>
+    </form>
+    <div class="switch-link">Sudah punya akun? <a href="/login">Login Sekarang</a></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% block title %}Edukasi{% endblock %}
+{% block topbar_title %}Edukasi & Informasi{% endblock %}
+{% block topbar_sub %}Panduan penggunaan dan berita keselamatan jalan{% endblock %}
+{% block content %}
+<style>
+.edu-tabs{display:flex;gap:4px;background:#f3f4f6;border-radius:10px;padding:4px;margin-bottom:24px;max-width:520px}
+.etab{flex:1;padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;text-align:center;color:var(--tx2)}
+.etab.on{background:var(--wh);color:var(--pri);box-shadow:var(--sh)}
+.epanel{display:none}.epanel.on{display:block}
+/* MINDMAP */
+.mindmap{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:18px}
+.mm-header{background:var(--pri);color:#fff;padding:14px 20px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.mm-body{padding:22px}
+.mm-center{background:var(--pri);color:#fff;border-radius:14px;padding:16px 24px;text-align:center;font-weight:700;font-size:15px;margin:0 auto 24px;max-width:260px;box-shadow:0 4px 12px rgba(26,86,219,.3)}
+.mm-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.mm-node{background:var(--bg);border:1.5px solid var(--bd);border-radius:12px;padding:14px 16px;transition:.15s;cursor:default}
+.mm-node:hover{border-color:var(--pri);background:var(--pri-l)}
+.mm-node-num{width:26px;height:26px;border-radius:50%;background:var(--pri);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.mm-node-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.mm-node-desc{font-size:12px;color:var(--tx2);line-height:1.55}
+/* KALKULATOR */
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.calc-box{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:22px;box-shadow:var(--sh)}
+.calc-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.calc-sub{font-size:12.5px;color:var(--tx2);margin-bottom:18px}
+.slider-row{margin-bottom:16px}
+.slider-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+.slider-label strong{font-size:16px;font-weight:800;color:var(--pri)}
+input[type=range]{width:100%;accent-color:var(--pri)}
+.result-box{background:var(--pri-l);border:1.5px solid rgba(26,86,219,.2);border-radius:var(--rsm);padding:14px 16px;margin-top:14px;text-align:center}
+.result-big{font-size:32px;font-weight:800;color:var(--pri);line-height:1}
+.result-unit{font-size:13px;color:var(--tx2);margin-top:4px}
+/* NEWS */
+.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.nc{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);transition:transform .15s,box-shadow .15s}
+.nc:hover{transform:translateY(-2px);box-shadow:var(--shm)}
+.nc-img{width:100%;height:140px;object-fit:cover;background:var(--pri-l)}
+.nc-img-ph{width:100%;height:140px;background:linear-gradient(135deg,#eff6ff,#dbeafe);display:flex;align-items:center;justify-content:center}
+.nc-body{padding:14px 16px}
+.nc-cat{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.nc-title{font-size:13.5px;font-weight:700;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nc-text{font-size:12px;color:var(--tx2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
+.nc-date{font-size:11px;color:var(--tx3)}
+@media(max-width:900px){.mm-row,.calc-grid{grid-template-columns:1fr}.news-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.news-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="ph"><h1>Edukasi & Informasi</h1><p>Pelajari cara menggunakan platform DIANA, pahami konsep TTC, dan baca berita terkini seputar keselamatan jalan.</p></div>
+
+<!-- TABS -->
+<div class="edu-tabs">
+  <div class="etab on" onclick="showTab('panduan',this)">Panduan Penggunaan</div>
+  <div class="etab" onclick="showTab('kalkulator',this)">Kalkulator Jarak</div>
+  <div class="etab" onclick="showTab('berita',this)">Berita Terkini</div>
+</div>
+
+<!-- TAB 1: PANDUAN / MINDMAP -->
+<div class="epanel on" id="ep-panduan">
+  <div class="mindmap">
+    <div class="mm-header">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      Mind Map — Alur Penggunaan DIANA Detector
+    </div>
+    <div class="mm-body">
+      <div class="mm-center">DIANA Detector<br><span style="font-size:12px;font-weight:400;opacity:.75">Platform Analisis Lalu Lintas</span></div>
+      <div class="mm-row">
+        <div class="mm-node"><div class="mm-node-num">1</div><div class="mm-node-title">Daftar & Login</div><div class="mm-node-desc">Buka halaman <strong>/register</strong> → isi username, email, password → login di <strong>/login</strong> dengan akun yang sudah dibuat.</div></div>
+        <div class="mm-node"><div class="mm-node-num">2</div><div class="mm-node-title">Upload Video</div><div class="mm-node-desc">Masuk ke menu <strong>Upload Video</strong> → pilih file MP4 dari CCTV ATCS → isi nama jalan, tanggal, jam CCTV → klik Proses.</div></div>
+        <div class="mm-node"><div class="mm-node-num">3</div><div class="mm-node-title">Proses Analisis</div><div class="mm-node-desc">Sistem YOLOv8 + ByteTrack mendeteksi kendaraan, menghitung kecepatan EMA, dan memprediksi TTC secara otomatis.</div></div>
+        <div class="mm-node"><div class="mm-node-num">4</div><div class="mm-node-title">Pantau Progress</div><div class="mm-node-desc">Buka <strong>Pengajuan/Riwayat</strong> untuk melihat progress bar dan status proses secara real-time (diperbarui tiap 4 detik).</div></div>
+        <div class="mm-node"><div class="mm-node-num">5</div><div class="mm-node-title">Lihat Hasil</div><div class="mm-node-desc">Setelah selesai, buka <strong>Lihat Hasil</strong> untuk melihat grafik TTC, output PKJI 2023 (Q, DJ, TP), dan log kejadian bahaya.</div></div>
+        <div class="mm-node"><div class="mm-node-num">6</div><div class="mm-node-title">Download Data</div><div class="mm-node-desc">Unduh file Excel multi-sheet lengkap (Detail per Lajur, Ringkasan, Kejadian TTC, PKJI 2023) untuk keperluan laporan.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TTC Explanation -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+    {% for cat,color,icon_d,title,desc in [
+      ('BAHAYA','#dc2626','M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z','TTC &lt; 1.5 detik','Kendaraan belakang akan menabrak kendaraan depan dalam waktu kurang dari 1.5 detik. Tindakan darurat harus segera diambil.'),
+      ('WASPADA','#d97706','M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z','TTC 1.5–3.0 detik','Jarak masih bisa aman namun membutuhkan perhatian. Pengemudi harus segera mengurangi kecepatan.'),
+      ('AMAN','#16a34a','M9 11l3 3L22 4','TTC &ge; 3.0 detik','Jarak antar kendaraan cukup aman. Pengemudi memiliki waktu yang cukup untuk bereaksi.')
+    ] %}
+    <div class="card" style="padding:16px;border-top:3px solid {{ color }}">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:8px;background:{{ color }}18;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ color }}" stroke-width="2"><path d="{{ icon_d }}"/></svg></div>
+        <div><div style="font-size:13px;font-weight:800;color:{{ color }}">{{ cat }}</div><div style="font-size:11px;color:var(--tx2)">{{ title }}</div></div>
+      </div>
+      <div style="font-size:12.5px;color:var(--tx2);line-height:1.65">{{ desc }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- TAB 2: KALKULATOR -->
+<div class="epanel" id="ep-kalkulator">
+  <div class="calc-grid">
+    <div class="calc-box">
+      <div class="calc-title">Kalkulator Jarak Aman</div>
+      <div class="calc-sub">Berdasarkan rumus reaksi + pengereman (PKJI 2023): d = v·t + v²/2a</div>
+      <div class="slider-row">
+        <div class="slider-label"><span>Kecepatan Kendaraan</span><strong id="speedVal">60</strong> km/h</div>
+        <input type="range" min="10" max="120" value="60" id="speedSlider" oninput="calcSafe()">
+      </div>
+      <div class="slider-row">
+        <div class="slider-label"><span>Waktu Reaksi</span><strong id="reactVal">1.0</strong> detik</div>
+        <input type="range" min="5" max="25" value="10" id="reactSlider" oninput="calcSafe()">
+      </div>
+      <div class="result-box">
+        <div class="result-big" id="safeResult">—</div>
+        <div class="result-unit">meter jarak aman minimum</div>
+      </div>
+      <div id="safeTip" style="margin-top:12px;padding:10px 13px;background:var(--bg);border-radius:var(--rsm);font-size:12.5px;color:var(--tx2);line-height:1.65"></div>
+    </div>
+    <div class="calc-box">
+      <div class="calc-title">Kalkulator TTC</div>
+      <div class="calc-sub">Time-to-Collision: waktu sebelum tabrakan terjadi jika kecepatan tidak berubah</div>
+      <div class="slider-row">
+        <div class="slider-label"><span>Kecepatan Belakang</span><strong id="vBVal">70</strong> km/h</div>
+        <input type="range" min="10" max="120" value="70" id="vBSlider" oninput="calcTTC()">
+      </div>
+      <div class="slider-row">
+        <div class="slider-label"><span>Kecepatan Depan</span><strong id="vFVal">50</strong> km/h</div>
+        <input type="range" min="10" max="120" value="50" id="vFSlider" oninput="calcTTC()">
+      </div>
+      <div class="slider-row">
+        <div class="slider-label"><span>Jarak Antar Kendaraan</span><strong id="distVal">15</strong> meter</div>
+        <input type="range" min="2" max="80" value="15" id="distSlider" oninput="calcTTC()">
+      </div>
+      <div class="result-box" id="ttcResultBox">
+        <div class="result-big" id="ttcResult">—</div>
+        <div class="result-unit">detik (TTC)</div>
+      </div>
+      <div id="ttcStatus" style="margin-top:10px;text-align:center"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: BERITA -->
+<div class="epanel" id="ep-berita">
+  {% if news %}
+  <div class="news-grid">
+    {% for n in news %}
+    <div class="nc">
+      {%- set yt_id = get_yt_id(n.video_url) -%}
+      {% if yt_id %}
+        {# Berita video: tampilkan thumbnail YouTube yang bisa diklik ke YouTube #}
+        <a href="https://www.youtube.com/watch?v={{ yt_id }}" target="_blank" rel="noopener" style="display:block;position:relative;overflow:hidden">
+          <img src="https://img.youtube.com/vi/{{ yt_id }}/mqdefault.jpg" style="width:100%;height:150px;object-fit:cover;display:block" alt="{{ n.title }}">
+          <div style="position:absolute;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center">
+            <div style="width:50px;height:50px;background:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+          </div>
+        </a>
+      {% elif n.image_url %}
+        <img src="{{ n.image_url }}" style="width:100%;height:150px;object-fit:cover;display:block" alt="{{ n.title }}"
+             onerror="this.style.display='none'">
+      {% else %}
+        <div style="width:100%;height:150px;background:linear-gradient(135deg,#eff6ff,#dbeafe);display:flex;align-items:center;justify-content:center">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--pri)" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+      {% endif %}
+      <div class="nc-body">
+        <div class="nc-cat" style="color:{% if n.category=='video' %}#dc2626{% elif n.category=='edaran' %}#d97706{% else %}var(--pri){% endif %}">
+          {% if yt_id %}▶ VIDEO{% else %}{{ n.category|upper }}{% endif %}
+        </div>
+        <div class="nc-title">{{ n.title }}</div>
+        <div class="nc-text">{{ n.content }}</div>
+        {% if yt_id %}
+        <a href="https://www.youtube.com/watch?v={{ yt_id }}" target="_blank" rel="noopener"
+           style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#dc2626;font-weight:600;margin:6px 0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#dc2626"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+          Tonton di YouTube
+        </a>
+        {% endif %}
+        <div class="nc-date">{{ n.created_at.strftime('%d %b %Y') }} · {{ n.author }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card" style="padding:48px;text-align:center;color:var(--tx2)">Belum ada berita. Admin dapat menambahkan melalui Panel Admin → Kelola Berita.</div>
+  {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+function showTab(id,el){
+  document.querySelectorAll('.etab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.epanel').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('ep-'+id).classList.add('on');
+}
+function calcSafe(){
+  const v = +document.getElementById('speedSlider').value;
+  const tr= +document.getElementById('reactSlider').value/10;
+  document.getElementById('speedVal').textContent = v;
+  document.getElementById('reactVal').textContent = tr.toFixed(1);
+  const vm = v/3.6;
+  const d  = (vm*tr + (vm*vm)/(2*7.5)).toFixed(1);
+  document.getElementById('safeResult').textContent = d;
+  document.getElementById('safeTip').textContent = `Pada kecepatan ${v} km/h dengan waktu reaksi ${tr}s: jarak reaksi ${(vm*tr).toFixed(1)}m + jarak pengereman ${(vm*vm/15).toFixed(1)}m = total ${d} meter.`;
+}
+function calcTTC(){
+  const vb = +document.getElementById('vBSlider').value;
+  const vf = +document.getElementById('vFSlider').value;
+  const d  = +document.getElementById('distSlider').value;
+  document.getElementById('vBVal').textContent = vb;
+  document.getElementById('vFVal').textContent = vf;
+  document.getElementById('distVal').textContent = d;
+  const dv = (vb-vf)/3.6;
+  const box = document.getElementById('ttcResultBox');
+  const status = document.getElementById('ttcStatus');
+  if(dv<=0){
+    document.getElementById('ttcResult').textContent='∞';
+    box.style.background='#f0fdf4';box.style.borderColor='rgba(22,163,74,.3)';
+    status.innerHTML='<span class="schip ch-done">Aman — Kendaraan menjauh atau sama kecepatan</span>';
+  } else {
+    const ttc=(d/dv).toFixed(2);
+    document.getElementById('ttcResult').textContent=ttc;
+    if(ttc<1.5){box.style.background='#fef2f2';box.style.borderColor='rgba(220,38,38,.3)';status.innerHTML='<span class="schip ch-err">BAHAYA — Tabrakan segera!</span>';}
+    else if(ttc<3){box.style.background='#fffbeb';box.style.borderColor='rgba(217,119,6,.3)';status.innerHTML='<span class="schip ch-pend">WASPADA — Kurangi kecepatan</span>';}
+    else{box.style.background='#f0fdf4';box.style.borderColor='rgba(22,163,74,.3)';status.innerHTML='<span class="schip ch-done">Aman</span>';}
+  }
+}
+calcSafe();calcTTC();
+</script>
+{% endblock %}
+{% endblock %}

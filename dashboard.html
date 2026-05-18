@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+{% block topbar_sub %}{% if current_user() and current_user().role=='admin' %}Semua data — Admin{% elif current_user() %}Data analisis Anda{% else %}Login untuk melihat data Anda{% endif %}{% endblock %}
+{% block content %}
+<style>
+.chart-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px}
+.cc{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.cc-t{font-size:13.5px;font-weight:700;margin-bottom:4px}
+.cc-s{font-size:12px;color:var(--tx2);margin-bottom:18px}
+.es{background:var(--wh);border:2px dashed var(--bd);border-radius:var(--r);padding:60px;text-align:center}
+@media(max-width:900px){.chart-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="ph">
+  <h1>Dashboard {% if current_user() and current_user().role=='admin' %}Admin{% elif current_user() %}Analisis Saya{% else %}Publik{% endif %}</h1>
+  <p>{% if current_user() %}Statistik dari video yang telah Anda analisis menggunakan DIANA.{% else %}Login untuk menganalisis video dan melihat dashboard.{% endif %}</p>
+</div>
+
+{% if is_empty %}
+<div class="es">
+  <div style="width:60px;height:60px;border-radius:14px;background:var(--pri-l);display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--pri)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+  </div>
+  <div style="font-size:18px;font-weight:800;margin-bottom:8px">Dashboard Masih Kosong</div>
+  <div style="font-size:14px;color:var(--tx2);max-width:380px;margin:0 auto 24px;line-height:1.7">
+    {% if current_user() %}Belum ada video yang dianalisis. Upload video CCTV untuk mulai.
+    {% else %}Login atau daftar akun untuk menganalisis video CCTV dan melihat statistik keselamatan jalan.{% endif %}
+  </div>
+  {% if current_user() %}
+  <a href="{{ url_for('upload') }}" class="btn btn-pri" style="display:inline-flex">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Upload Video Sekarang
+  </a>
+  {% else %}
+  <div style="display:flex;gap:10px;justify-content:center">
+    <a href="{{ url_for('login') }}" class="btn btn-pri">Login</a>
+    <a href="{{ url_for('register') }}" class="btn btn-out">Daftar Gratis</a>
+  </div>
+  {% endif %}
+</div>
+
+{% else %}
+<div class="stat-grid">
+  <div class="scard sc-b"><div class="si si-b"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div class="sv" style="color:var(--pri)">{{ sessions|length }}</div><div class="sl">Total Sesi Analisis</div></div>
+  <div class="scard sc-r"><div class="si si-r"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div><div class="sv" style="color:var(--red)">{{ total_dg }}</div><div class="sl">Kejadian BAHAYA</div></div>
+  <div class="scard sc-g"><div class="si si-g"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div class="sv" style="color:var(--grn)">{{ total_veh }}</div><div class="sl">Total Kendaraan</div></div>
+  <div class="scard sc-a"><div class="si si-a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></div><div class="sv" style="color:var(--amb)">{{ avg_spd }} <span style="font-size:15px">km/h</span></div><div class="sl">Kecepatan Rata-rata</div></div>
+</div>
+
+<div class="chart-grid">
+  <div class="cc">
+    <div class="cc-t">Distribusi Kejadian Bahaya per Jam</div>
+    <div class="cc-s">Berdasarkan waktu CCTV dari semua sesi analisis</div>
+    <canvas id="hourChart" height="100"></canvas>
+  </div>
+  <div class="cc">
+    <div class="cc-t">Komposisi Kendaraan PKJI 2023</div>
+    <div class="cc-s">KR · KB · SM (Total: {{ total_veh }})</div>
+    <canvas id="pieChart" height="180"></canvas>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
+      <div style="display:flex;align-items:center;gap:5px;font-size:12px"><div style="width:9px;height:9px;border-radius:50%;background:#1a56db"></div>KR {{ total_kr }}</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:12px"><div style="width:9px;height:9px;border-radius:50%;background:#dc2626"></div>KB {{ total_kb }}</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:12px"><div style="width:9px;height:9px;border-radius:50%;background:#d97706"></div>SM {{ total_sm }}</div>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:18px">
+  <div class="card">
+    <div class="ch"><div class="ct">Sesi Analisis Terbaru</div><a href="{{ url_for('riwayat') }}" style="font-size:12px;color:var(--pri);font-weight:600">Lihat semua</a></div>
+    <div style="padding:0 20px">
+      {% for s in sessions[:8] %}
+      <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #f3f4f6">
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--pri-l);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--pri)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700">{{ s.road_name }}</div>
+          <div style="font-size:11.5px;color:var(--tx2)">{{ s.cctv_date }} · {{ s.total_veh }} kend · {{ "%.1f"|format(s.avg_speed) }} km/h</div>
+        </div>
+        <span class="badge {% if s.danger_ev>0 %}bd-r{% else %}bd-g{% endif %}">{{ s.danger_ev }} bahaya</span>
+        <a href="{{ url_for('hasil',sid=s.id) }}" class="btn btn-out btn-sm">Lihat</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card" style="padding:20px">
+    <div class="ct" style="margin-bottom:4px">Ringkasan PKJI 2023</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:14px">Rata-rata semua sesi</div>
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:38px;font-weight:800;color:var(--pri);line-height:1">{{ avg_dj }}</div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:3px">Derajat Kejenuhan</div>
+    </div>
+    {% for tp,label,color in [('A','Sangat Baik','#16a34a'),('B','Baik','#2563eb'),('C','Cukup','#d97706'),('D','Buruk','#dc2626'),('E','Kritis','#9f1239'),('F','Breakdown','#450a0a')] %}
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 9px;border-radius:6px;margin-bottom:4px;background:#f9fafb">
+      <div style="width:22px;height:22px;border-radius:5px;background:{{ color }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff">{{ tp }}</div>
+      <span style="font-size:12px;font-weight:500">{{ label }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% block scripts %}
+{% if not is_empty %}
+<script>
+new Chart(document.getElementById('hourChart'),{type:'bar',data:{labels:{{ hours|safe }},datasets:[{label:'Kejadian Bahaya',data:{{ hdanger|safe }},backgroundColor:'rgba(26,86,219,.18)',borderColor:'#1a56db',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f3f4f6'},ticks:{font:{size:10}},beginAtZero:true}}}});
+new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:['KR','KB','SM'],datasets:[{data:{{ pie_data|safe }},backgroundColor:['#1a56db','#dc2626','#d97706'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,cutout:'68%',plugins:{legend:{display:false}}}});
+</script>
+{% endif %}
+{% endblock %}
+{% endblock %}

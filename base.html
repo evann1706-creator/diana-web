@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}DIANA Detector{% endblock %} — RSTJ-C Muda | PKTJ Tegal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--pri:#1a56db;--pri-d:#1547c0;--pri-l:#eff6ff;--sw:252px;--th:64px;--bg:#f0f2f8;--wh:#fff;--bd:#e5e7eb;--tx:#111827;--tx2:#6b7280;--tx3:#9ca3af;--red:#dc2626;--amb:#d97706;--grn:#16a34a;--tel:#0891b2;--sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);--shm:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.04);--r:10px;--rsm:6px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--wh);border-right:1px solid var(--bd);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sb-brand{padding:18px 16px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:11px}
+.sb-icon{width:40px;height:40px;border-radius:10px;background:var(--pri);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-name{font-size:16px;font-weight:800;color:var(--pri);letter-spacing:-0.4px;line-height:1.2}
+.sb-sub{font-size:9.5px;color:var(--tx2);letter-spacing:.3px;margin-top:1px}
+.nav-sec{padding:8px 14px 3px;font-size:9.5px;font-weight:700;letter-spacing:.1em;color:var(--tx3);text-transform:uppercase;margin-top:6px}
+.ni{display:flex;align-items:center;gap:10px;padding:8px 12px;margin:1px 8px;border-radius:var(--rsm);color:var(--tx2);font-size:13px;font-weight:500;transition:all .15s;position:relative}
+.ni:hover{background:var(--bg);color:var(--tx)}
+.ni.active{background:var(--pri-l);color:var(--pri)}
+.ni svg{width:17px;height:17px;flex-shrink:0}
+.ni-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;min-width:18px;text-align:center;display:none}
+.ni-badge.show{display:block}
+.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid var(--bd);font-size:10.5px;color:var(--tx3);line-height:1.55}
+
+.topbar{position:fixed;left:var(--sw);right:0;top:0;height:var(--th);background:var(--wh);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 26px;gap:14px;z-index:90}
+.tb-title{font-size:16px;font-weight:700;flex:1;letter-spacing:-.3px}
+.tb-sub{color:var(--tx2);font-weight:400;font-size:13px;margin-left:8px}
+.tb-right{display:flex;align-items:center;gap:10px}
+.notif-btn{width:36px;height:36px;border-radius:8px;background:var(--bg);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;position:relative}
+.notif-btn:hover{background:var(--bd)}
+.ndot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--wh);display:none}
+.ndot.show{display:block}
+.uchip{display:flex;align-items:center;gap:8px;padding:5px 11px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;cursor:pointer;transition:.15s;position:relative}
+.uchip:hover{background:var(--bd)}
+.uavatar{width:28px;height:28px;border-radius:50%;background:var(--pri);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.uname{font-size:13px;font-weight:600}
+.urole{font-size:10px;color:var(--tx2)}
+.udrop{position:absolute;top:calc(var(--th) - 4px);right:26px;background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--shm);min-width:186px;z-index:200;padding:6px;display:none}
+.udrop.open{display:block}
+.ddi{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rsm);font-size:13px;color:var(--tx2);cursor:pointer;transition:.15s}
+.ddi:hover{background:var(--bg);color:var(--tx)}
+.ddi.red{color:var(--red)}
+.ddi.red:hover{background:#fef2f2}
+
+.main{margin-left:var(--sw);margin-top:var(--th);min-height:calc(100vh - var(--th));padding:26px}
+.flash-wrap{margin-bottom:18px}
+.flash{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:var(--rsm);font-size:13.5px;margin-bottom:7px;border-left:4px solid}
+.flash.success{background:#f0fdf4;border-color:var(--grn);color:#14532d}
+.flash.danger{background:#fef2f2;border-color:var(--red);color:#7f1d1d}
+.flash.warning{background:#fffbeb;border-color:var(--amb);color:#78350f}
+.flash.info{background:#eff6ff;border-color:var(--pri);color:#1e3a5f}
+
+.card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh)}
+.ch{padding:15px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.ct{font-size:13.5px;font-weight:700}
+.cb{padding:20px}
+
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.scard{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:18px 20px;position:relative;overflow:hidden}
+.scard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 var(--r) var(--r)}
+.scard.sc-b::after{background:var(--pri)}
+.scard.sc-r::after{background:var(--red)}
+.scard.sc-g::after{background:var(--grn)}
+.scard.sc-a::after{background:var(--amb)}
+.si{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.si-b{background:#eff6ff;color:var(--pri)}
+.si-r{background:#fef2f2;color:var(--red)}
+.si-g{background:#f0fdf4;color:var(--grn)}
+.si-a{background:#fffbeb;color:var(--amb)}
+.sv{font-size:26px;font-weight:800;line-height:1;margin-bottom:3px;letter-spacing:-.5px}
+.sl{font-size:12px;color:var(--tx2);font-weight:500}
+
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.bd-b{background:#eff6ff;color:var(--pri)}.bd-r{background:#fef2f2;color:var(--red)}.bd-g{background:#f0fdf4;color:var(--grn)}.bd-a{background:#fffbeb;color:var(--amb)}.bd-gray{background:#f9fafb;color:var(--tx2);border:1px solid var(--bd)}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--rsm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:inherit}
+.btn-pri{background:var(--pri);color:#fff}.btn-pri:hover{background:var(--pri-d);color:#fff}
+.btn-out{background:#fff;color:var(--tx);border:1px solid var(--bd)}.btn-out:hover{background:var(--bg)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#b91c1c;color:#fff}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#f9fafb}
+th{text-align:left;padding:10px 14px;font-size:10.5px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--bd);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#fafafa}
+
+.fg{margin-bottom:16px}
+.fl{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+.fl span{color:var(--red)}
+.fi,.fs,.fta{width:100%;border:1.5px solid var(--bd);border-radius:var(--rsm);padding:10px 13px;font-size:13.5px;font-family:inherit;color:var(--tx);background:#fff;outline:none;transition:border-color .15s}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(26,86,219,.08)}
+.fhint{font-size:11.5px;color:var(--tx2);margin-top:4px}
+.fta{resize:vertical;min-height:88px}
+
+.prog-wrap{background:#e5e7eb;border-radius:999px;height:8px;overflow:hidden}
+.prog-bar{height:100%;border-radius:999px;background:var(--pri);transition:width .4s}
+
+.schip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
+.schip::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ch-done{background:#f0fdf4;color:var(--grn)}.ch-done::before{background:var(--grn)}
+.ch-proc{background:#eff6ff;color:var(--pri);animation:pulse 1.5s infinite}.ch-proc::before{background:var(--pri)}
+.ch-pend{background:#fffbeb;color:var(--amb)}.ch-pend::before{background:var(--amb)}
+.ch-err{background:#fef2f2;color:var(--red)}.ch-err::before{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+.ph{margin-bottom:22px}
+.ph h1{font-size:21px;font-weight:800;letter-spacing:-.4px;margin-bottom:3px}
+.ph p{font-size:13.5px;color:var(--tx2)}
+
+.divider{height:1px;background:var(--bd);margin:16px 0}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12px}
+
+@media(max-width:1024px){.stat-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.topbar,.main{margin-left:0}}
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
+    <div><div class="sb-name">DIANA<span style="color:var(--tx)">Web</span></div><div class="sb-sub">RSTJ-C Muda · PKTJ TEGAL</div></div>
+  </div>
+
+  <div style="padding:6px 0 10px">
+    <div class="nav-sec">Menu Utama</div>
+    <a href="{{ url_for('home') }}" class="ni {% if request.endpoint=='home' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Beranda
+    </a>
+    <a href="{{ url_for('dashboard') }}" class="ni {% if request.endpoint=='dashboard' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard Publik
+    </a>
+    <a href="{{ url_for('peta') }}" class="ni {% if request.endpoint=='peta' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Peta Rawan
+    </a>
+    <a href="{{ url_for('edukasi') }}" class="ni {% if request.endpoint=='edukasi' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Edukasi
+    </a>
+
+    {% if current_user() %}
+    <div class="nav-sec">Analisis Video</div>
+    <a href="{{ url_for('upload') }}" class="ni {% if request.endpoint=='upload' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload Video
+    </a>
+    <a href="{{ url_for('riwayat') }}" class="ni {% if request.endpoint in ['riwayat','hasil'] %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Pengajuan / Riwayat
+      <span class="ni-badge" id="pending-badge">0</span>
+    </a>
+    {% endif %}
+
+    {% if current_user() and current_user().role=='admin' %}
+    <div class="nav-sec">Administrasi</div>
+    <a href="{{ url_for('admin_dash') }}" class="ni {% if request.endpoint=='admin_dash' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Panel Admin
+    </a>
+    <a href="{{ url_for('admin_users') }}" class="ni {% if request.endpoint=='admin_users' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Kelola Pengguna
+    </a>
+    <a href="{{ url_for('admin_berita') }}" class="ni {% if 'berita' in request.endpoint %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Kelola Berita
+    </a>
+    <a href="{{ url_for('admin_config') }}" class="ni {% if request.endpoint=='admin_config' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>Konfigurasi
+    </a>
+    {% endif %}
+
+    {% if not current_user() %}
+    <div class="nav-sec">Akun</div>
+    <a href="{{ url_for('login') }}"    class="ni {% if request.endpoint=='login'    %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>Login
+    </a>
+    <a href="{{ url_for('register') }}" class="ni {% if request.endpoint=='register' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Daftar
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="sb-foot">
+    <div style="font-weight:700;font-size:11px;color:var(--tx);margin-bottom:2px">YOLOv8 · ByteTrack · TTC</div>
+    PKJI 2023 · LKTI Nasional PKTJ 2026
+  </div>
+</nav>
+
+<header class="topbar">
+  <div class="tb-title">{% block topbar_title %}DIANA Detector{% endblock %}<span class="tb-sub">{% block topbar_sub %}{% endblock %}</span></div>
+  <div class="tb-right">
+    {% if current_user() %}
+    <div class="notif-btn" onclick="toggleDrop()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span class="ndot" id="ndot"></span>
+    </div>
+    <div class="uchip" onclick="toggleDrop()">
+      <div class="uavatar">{{ current_user().username[0].upper() }}</div>
+      <div><div class="uname">{{ current_user().username }}</div><div class="urole">{{ 'Admin' if current_user().role=='admin' else 'Pengguna' }}</div></div>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="udrop" id="udrop">
+      {% if current_user().role=='admin' %}<a href="{{ url_for('admin_dash') }}" class="ddi"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Panel Admin</a>{% endif %}
+      <a href="{{ url_for('riwayat') }}" class="ddi"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Riwayat Analisis</a>
+      <div class="divider" style="margin:4px 0"></div>
+      <a href="{{ url_for('logout') }}" class="ddi red"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Keluar</a>
+    </div>
+    {% else %}
+    <a href="{{ url_for('login') }}" class="btn btn-out btn-sm">Masuk</a>
+    <a href="{{ url_for('register') }}" class="btn btn-pri btn-sm">Daftar</a>
+    {% endif %}
+  </div>
+</header>
+
+<main class="main">
+  {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}
+  <div class="flash-wrap">{% for cat,msg in messages %}<div class="flash {{ cat }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{ msg }}</div>{% endfor %}
+  </div>{% endif %}{% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<script>
+function toggleDrop(){document.getElementById('udrop').classList.toggle('open')}
+document.addEventListener('click',e=>{if(!e.target.closest('.uchip')&&!e.target.closest('.notif-btn')&&!e.target.closest('.udrop'))document.getElementById('udrop')?.classList.remove('open')});
+{% if current_user() %}
+function checkPending(){fetch('/api/pending-count').then(r=>r.json()).then(d=>{const b=document.getElementById('pending-badge'),n=document.getElementById('ndot');if(b){d.count>0?(b.textContent=d.count,b.classList.add('show')):b.classList.remove('show')}if(n)n.classList.toggle('show',d.count>0)}).catch(()=>{})}
+checkPending();setInterval(checkPending,8000);
+{% endif %}
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

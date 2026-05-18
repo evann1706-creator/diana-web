@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Peta Titik Rawan{% endblock %}
+{% block topbar_title %}Peta Titik Rawan Kecelakaan{% endblock %}
+{% block topbar_sub %}Kabupaten Banyumas — data berdasarkan penelitian lapangan{% endblock %}
+{% block head %}
+<style>
+#map{height:520px;border-radius:var(--r);border:1px solid var(--bd);box-shadow:var(--sh)}
+.legend-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.leg-card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh);display:flex;align-items:center;gap:12px}
+.leg-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.leg-title{font-size:13px;font-weight:700;margin-bottom:1px}
+.leg-sub{font-size:11.5px;color:var(--tx2)}
+.spot-list{max-height:460px;overflow-y:auto}
+.spot-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:.15s}
+.spot-item:hover{background:#fafafa}
+.spot-item:last-child{border-bottom:none}
+.spot-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.spot-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.spot-jalan{font-size:11.5px;color:var(--tx2)}
+.spot-num{font-size:22px;font-weight:800;min-width:36px;text-align:center}
+.leaflet-popup-content{font-family:'Plus Jakarta Sans',sans-serif!important;font-size:13px}
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="ph"><h1>Peta Titik Rawan Kecelakaan</h1><p>Persebaran 15 titik rawan kecelakaan di Kabupaten Banyumas berdasarkan data penelitian dan analisis DIANA.</p></div>
+
+<!-- LEGEND -->
+<div class="legend-grid">
+  <div class="leg-card"><div class="leg-dot" style="background:#dc2626"></div><div><div class="leg-title" style="color:#dc2626">Tinggi</div><div class="leg-sub">{{ stats.tinggi }} titik · Prioritas penanganan</div></div></div>
+  <div class="leg-card"><div class="leg-dot" style="background:#d97706"></div><div><div class="leg-title" style="color:#d97706">Sedang</div><div class="leg-sub">{{ stats.sedang }} titik · Perlu pengawasan</div></div></div>
+  <div class="leg-card"><div class="leg-dot" style="background:#16a34a"></div><div><div class="leg-title" style="color:#16a34a">Rendah</div><div class="leg-sub">{{ stats.rendah }} titik · Potensi bahaya ada</div></div></div>
+</div>
+
+<!-- MAP + LIST -->
+<div style="display:grid;grid-template-columns:1fr 320px;gap:18px">
+  <div class="card" style="padding:0;overflow:hidden">
+    <div id="map"></div>
+    <div style="padding:10px 16px;background:#f9fafb;border-top:1px solid var(--bd);font-size:11.5px;color:var(--tx2)">
+      Total kejadian tercatat: <strong style="color:var(--tx)">{{ stats.total_kejadian }}</strong> · Klik marker untuk detail · Sumber: Data Penelitian Titik Rawan Banyumas
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ct">Daftar Titik Rawan</div><span style="font-size:12px;color:var(--tx2)">15 titik</span></div>
+    <div class="spot-list" id="spotList">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+const SPOTS = {{ spots|safe }};
+const COLOR = {Tinggi:'#dc2626', Sedang:'#d97706', Rendah:'#16a34a', 'Perlu Validasi':'#7c3aed'};
+
+// Init Map (center Banyumas)
+const map = L.map('map').setView([-7.47, 109.2], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(map);
+
+// Add markers
+const markers = {};
+SPOTS.forEach((s,i) => {
+  const color  = COLOR[s.tingkat] || '#16a34a';
+  const isUser = s.sumber === 'User Upload';
+  const sz     = isUser ? 18 : 16;
+  const border = isUser ? '3px dashed rgba(255,255,255,.8)' : '2.5px solid #fff';
+  const icon   = L.divIcon({
+    className:'',
+    html:`<div style="width:${sz}px;height:${sz}px;background:${color};border:${border};border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.35)"></div>`,
+    iconSize:[sz,sz], iconAnchor:[sz/2,sz/2]
+  });
+  const m = L.marker([s.lat, s.lng], {icon}).addTo(map);
+  m.bindPopup(`<div style="min-width:220px;font-family:sans-serif">
+    <div style="font-size:14px;font-weight:700;margin-bottom:4px">${s.nama}</div>
+    <div style="font-size:12px;color:#6b7280;margin-bottom:8px">${s.jalan}</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+      <span style="background:${color}18;color:${color};padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700">Tingkat: ${s.tingkat}</span>
+      ${isUser?'<span style="background:#ede9fe;color:#7c3aed;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700">Dari Upload User</span>':''}
+    </div>
+    <div style="font-size:12px;margin-bottom:4px"><strong>${s.kejadian}</strong> kejadian tercatat</div>
+    <div style="font-size:11.5px;color:#6b7280">${s.ket}</div>
+    ${!isUser?'<div style="font-size:10px;color:#9ca3af;margin-top:6px">Sumber: Data Penelitian Banyumas 2022–2024</div>':''}
+  </div>`, {maxWidth:280});
+  markers[i] = m;
+  if(s.tingkat === 'Tinggi'){
+    const pulse = L.divIcon({
+      className:'',
+      html:`<div style="width:28px;height:28px;background:${color};border-radius:50%;opacity:.22;animation:ripple 2s infinite"></div>`,
+      iconSize:[28,28], iconAnchor:[14,14]
+    });
+    L.marker([s.lat, s.lng], {icon:pulse, zIndexOffset:-100}).addTo(map);
+  }
+});
+
+// Side list
+const list = document.getElementById('spotList');
+SPOTS.forEach((s,i) => {
+  const color = COLOR[s.tingkat] || '#16a34a';
+  const div   = document.createElement('div');
+  div.className = 'spot-item';
+  div.innerHTML = `<div class="spot-dot" style="background:${color}"></div>
+    <div style="flex:1"><div class="spot-name">${s.nama}</div><div class="spot-jalan">${s.jalan}</div></div>
+    <div class="spot-num" style="color:${color}">${s.kejadian}</div>`;
+  div.onclick = () => { map.flyTo([s.lat, s.lng], 15, {duration:1}); markers[i].openPopup(); };
+  list.appendChild(div);
+});
+</script>
+<style>
+@keyframes ripple{0%{transform:scale(1);opacity:.25}100%{transform:scale(2);opacity:0}}
+</style>
+{% endblock %}
+{% endblock %}
